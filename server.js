@@ -11,7 +11,7 @@ var cheerio = require("cheerio");
 // Require all models
 var db = require("./models");
 
-var PORT = 3000;
+const PORT  = process.env.PORT || 3000;
 
 // Initialize Express
 var app = express();
@@ -36,9 +36,9 @@ mongoose.connect(MONGODB_URI);
 // Routes
 
 // A GET route for index
-app.get("/"), function(req, res) {
+app.get("/", function(req, res) {
     res.render("index");
-};
+});
 
 // A GET route for scraping The Atlantic website
 app.get("/scrape", function(req, res) {
@@ -48,24 +48,24 @@ app.get("/scrape", function(req, res) {
     var $ = cheerio.load(response.data);
 
     // Now, we grab every h2 within an article tag, and do the following:
-    $("article").each(function(i, element) {
+    $(".c-card__content").each(function(i, element) {
       // Save an empty result object
       var result = {};
 
       // Add the text and href of every link, and save them as properties of the result object
       result.title = $(this)
-        .children("h2")
-        .children("a")
+        .find(".o-hed")
         .text();
       result.desc = $(this)
-        .children("p")
+        .find(".o-dek")
         .text();
       result.link = $(this)
-        .children("h2")
+        .find(".o-hed")
         .children("a")
         .attr("href");
 
       // Create a new Article using the `result` object built from scraping
+      console.log(result);
       db.Article.create(result)
         .then(function(dbArticle) {
           // View the added result in the console
