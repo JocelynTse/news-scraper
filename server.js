@@ -3,8 +3,7 @@ var bodyParser = require("body-parser");
 var logger = require("morgan");
 var mongoose = require("mongoose");
 
-// Our scraping tools
-// Axios is a promised-based http library, similar to jQuery's Ajax method
+// Scraping tools
 // It works on the client and on the server
 var axios = require("axios");
 var cheerio = require("cheerio");
@@ -36,7 +35,12 @@ mongoose.connect(MONGODB_URI);
 
 // Routes
 
-// A GET route for scraping the echoJS website
+// A GET route for index
+app.get("/"), function(req, res) {
+    res.render("index");
+};
+
+// A GET route for scraping The Atlantic website
 app.get("/scrape", function(req, res) {
   // First, we grab the body of the html with request
   axios.get("https://www.theatlantic.com/").then(function(response) {
@@ -44,15 +48,20 @@ app.get("/scrape", function(req, res) {
     var $ = cheerio.load(response.data);
 
     // Now, we grab every h2 within an article tag, and do the following:
-    $("article h2").each(function(i, element) {
+    $("article").each(function(i, element) {
       // Save an empty result object
       var result = {};
 
       // Add the text and href of every link, and save them as properties of the result object
       result.title = $(this)
+        .children("h2")
         .children("a")
         .text();
+      result.desc = $(this)
+        .children("p")
+        .text();
       result.link = $(this)
+        .children("h2")
         .children("a")
         .attr("href");
 
